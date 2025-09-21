@@ -24,7 +24,7 @@ public class CreateSignalsAndStates {
 
     }
 
-    @EventBusSubscriber(modid = CreateSignalsAndStates.MODID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
+    @EventBusSubscriber(modid = CreateSignalsAndStates.MODID, value = Dist.CLIENT)
     static class ClientModEvents {
         @SubscribeEvent
         static void onClientSetup(FMLClientSetupEvent event) {
