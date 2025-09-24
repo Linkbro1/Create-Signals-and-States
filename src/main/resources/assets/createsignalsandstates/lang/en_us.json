@@ -1,6 +1,9 @@
 {
   "creativetab.createsignalsandstates.signals_and_states_tab": "Create: Signals and States",
 
+  "block.createsignalsandstates.computer_controller": "Mechanical Computer Controller",
+  "block.createsignalsandstates.computer_rack": "Mechanical Computer Rack",
+
   "item.createsignalsandstates.cable": "Mechanical Computing Cable",
   "item.createsignalsandstates.sum_module": "Sum Module",
   "item.createsignalsandstates.split_module": "Split Module",

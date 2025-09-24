@@ -1,5 +1,6 @@
 package net.linkbro.createsignalsandstates;
 
+import net.linkbro.createsignalsandstates.block.SNSBlocks;
 import net.linkbro.createsignalsandstates.item.SNSItems;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -29,6 +30,7 @@ public class CreateSignalsAndStates {
         CREATIVE_MODE_TAB.register(modEventBus);
 
         SNSItems.register(modEventBus);
+        SNSBlocks.register(modEventBus);
 
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
@@ -38,15 +40,18 @@ public class CreateSignalsAndStates {
                     .title(Component.translatable("creativetab.createsignalsandstates.signals_and_states_tab"))
                     .icon(() -> new ItemStack(SNSItems.CABLE.get()))
                     .displayItems((ItemDisplayParameters,output) -> {
-                      output.accept(SNSItems.CABLE);
+                        output.accept(SNSBlocks.COMPUTER_CONTROLLER);
+                        output.accept(SNSBlocks.COMPUTER_RACK);
 
-                      output.accept(SNSItems.SUM_MODULE);
-                      output.accept(SNSItems.SPLIT_MODULE);
-                      output.accept(SNSItems.AND_MODULE);
-                      output.accept(SNSItems.OR_MODULE);
-                      output.accept(SNSItems.NOT_MODULE);
-                      output.accept(SNSItems.BIAS_MODULE);
-                      output.accept(SNSItems.LINK_MODULE);
+                        output.accept(SNSItems.CABLE);
+
+                        output.accept(SNSItems.SUM_MODULE);
+                        output.accept(SNSItems.SPLIT_MODULE);
+                        output.accept(SNSItems.AND_MODULE);
+                        output.accept(SNSItems.OR_MODULE);
+                        output.accept(SNSItems.NOT_MODULE);
+                        output.accept(SNSItems.BIAS_MODULE);
+                        output.accept(SNSItems.LINK_MODULE);
                     }).build());
 
     private void commonSetup(FMLCommonSetupEvent event) {
