@@ -1,0 +1,12 @@
+{
+  "creativetab.createsignalsandstates.signals_and_states_tab": "Create: Signals and States",
+
+  "item.createsignalsandstates.cable": "Mechanical Computing Cable",
+  "item.createsignalsandstates.sum_module": "Sum Module",
+  "item.createsignalsandstates.split_module": "Split Module",
+  "item.createsignalsandstates.and_module": "AND Module",
+  "item.createsignalsandstates.or_module": "OR Module",
+  "item.createsignalsandstates.not_module": "NOT Module",
+  "item.createsignalsandstates.bias_module": "Bias Module",
+  "item.createsignalsandstates.link_module": "Link Module"
+}
