@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "createsignalsandstates:computer_controller",
+    "createsignalsandstates:computer_rack"
+  ]
+}
