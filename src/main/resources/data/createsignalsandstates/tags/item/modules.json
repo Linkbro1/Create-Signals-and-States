@@ -1,0 +1,11 @@
+{
+  "values": [
+    "createsignalsandstates:sum_module",
+    "createsignalsandstates:split_module",
+    "createsignalsandstates:and_module",
+    "createsignalsandstates:or_module",
+    "createsignalsandstates:not_module",
+    "createsignalsandstates:bias_module",
+    "createsignalsandstates:link_module"
+  ]
+}
