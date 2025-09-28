@@ -6,15 +6,35 @@ import net.linkbro.createsignalsandstates.blockentity.ComputerControllerBlockEnt
 import net.linkbro.createsignalsandstates.blockentity.SNSBlockEntities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
 
 public class ComputerController extends HorizontalKineticBlock implements IBE<ComputerControllerBlockEntity> {
 
     public ComputerController(Properties properties) {
         super(properties);
         this.registerDefaultState(this.defaultBlockState().setValue(HORIZONTAL_FACING,Direction.NORTH));
+    }
+
+    @Override
+    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if(level.getBlockEntity(pos) instanceof ComputerControllerBlockEntity controller) {
+            if (!player.isShiftKeyDown()) {
+                controller.handleRightClick(stack, state, level, pos, player, hand, hitResult);
+                return ItemInteractionResult.SUCCESS;
+            } else {
+                controller.handleShiftRightClick(stack, state, level, pos, player, hand, hitResult);
+                return ItemInteractionResult.SUCCESS;
+            }
+        }
+        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
     }
 
     @Override
