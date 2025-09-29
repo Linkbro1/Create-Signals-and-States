@@ -5,6 +5,9 @@
   "block.createsignalsandstates.computer_rack": "Mechanical Computer Rack",
 
   "item.createsignalsandstates.cable": "Mechanical Computing Cable",
+
+  "item.createsignalsandstates.dummy_module": "Dummy Module(you should not see this item)",
+
   "item.createsignalsandstates.sum_module": "Sum Module",
   "item.createsignalsandstates.split_module": "Split Module",
   "item.createsignalsandstates.and_module": "AND Module",

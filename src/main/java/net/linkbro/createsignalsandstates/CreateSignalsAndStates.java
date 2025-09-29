@@ -2,6 +2,7 @@ package net.linkbro.createsignalsandstates;
 
 import net.linkbro.createsignalsandstates.block.SNSBlocks;
 import net.linkbro.createsignalsandstates.blockentity.SNSBlockEntities;
+import net.linkbro.createsignalsandstates.component.SNSDataComponents;
 import net.linkbro.createsignalsandstates.item.SNSItems;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
@@ -32,6 +33,7 @@ public class CreateSignalsAndStates {
 
         SNSItems.register(modEventBus);
         SNSBlocks.register(modEventBus);
+        SNSDataComponents.register(modEventBus);
         SNSBlockEntities.register(modEventBus);
 
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
