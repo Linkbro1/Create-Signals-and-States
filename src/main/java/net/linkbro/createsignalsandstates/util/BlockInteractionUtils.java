@@ -1,7 +1,10 @@
 package net.linkbro.createsignalsandstates.util;
 
+import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.BlockHitResult;
@@ -35,5 +38,9 @@ public class BlockInteractionUtils {
             case WEST -> {return new Vec2((float)(15-(pixelCoords.z)),(float)pixelCoords.y);}
             case null, default -> {return new Vec2(0,0);}
         }
+    }
+
+    public static int lightAtPos(Level level, BlockPos pos) {
+        return LightTexture.pack( level.getBrightness(LightLayer.BLOCK, pos) , level.getBrightness(LightLayer.SKY, pos));
     }
 }

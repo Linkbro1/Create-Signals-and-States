@@ -2,6 +2,7 @@ package net.linkbro.createsignalsandstates;
 
 import net.linkbro.createsignalsandstates.block.SNSBlocks;
 import net.linkbro.createsignalsandstates.blockentity.SNSBlockEntities;
+import net.linkbro.createsignalsandstates.blockentity.renderer.ComputerRackBlockEntityRenderer;
 import net.linkbro.createsignalsandstates.component.SNSDataComponents;
 import net.linkbro.createsignalsandstates.item.SNSItems;
 import net.minecraft.core.registries.Registries;
@@ -17,6 +18,7 @@ import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.event.lifecycle.FMLClientSetupEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.neoforged.neoforge.client.event.EntityRenderersEvent;
 import net.neoforged.neoforge.registries.DeferredRegister;
 
 import java.util.function.Supplier;
@@ -66,6 +68,11 @@ public class CreateSignalsAndStates {
     static class ClientModEvents {
         @SubscribeEvent
         static void onClientSetup(FMLClientSetupEvent event) {
+        }
+
+        @SubscribeEvent
+        public static void registerBER(EntityRenderersEvent.RegisterRenderers event) {
+            event.registerBlockEntityRenderer(SNSBlockEntities.RACK_BLOCK_ENTITY.get(), ComputerRackBlockEntityRenderer::new);
         }
     }
 }

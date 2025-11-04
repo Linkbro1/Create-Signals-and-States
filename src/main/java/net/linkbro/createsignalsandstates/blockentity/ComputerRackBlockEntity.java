@@ -4,10 +4,11 @@ import net.linkbro.createsignalsandstates.util.BlockInteractionUtils;
 import net.linkbro.createsignalsandstates.util.SNSTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.core.HolderLookup.Provider;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
@@ -18,12 +19,44 @@ import net.minecraft.world.phys.Vec2;
 import net.neoforged.neoforge.items.ItemStackHandler;
 
 public class ComputerRackBlockEntity extends BlockEntity {
-    private final ItemStackHandler inventory = new ItemStackHandler(8) {
+    public final ItemStackHandler inventory = new ItemStackHandler(8) {
         @Override
         public int getSlotLimit(int slot) {
             return 1;
         }
+
+        @Override
+        protected void onContentsChanged(int slot) {
+            setChanged();
+        };
     };
+
+    @Override
+    protected void saveAdditional(CompoundTag tag, Provider registries) {
+        super.saveAdditional(tag, registries);
+        tag.put("Inventory", inventory.serializeNBT(registries));
+    }
+
+    @Override
+    protected void loadAdditional(CompoundTag tag, Provider registries) {
+        super.loadAdditional(tag, registries);
+        if (tag.contains("Inventory")) {
+            inventory.deserializeNBT(registries, tag.getCompound("Inventory"));
+        }
+    }
+
+    @Override
+    public CompoundTag getUpdateTag(Provider registries) {
+        CompoundTag tag = super.getUpdateTag(registries);
+        saveAdditional(tag, registries);
+        return tag;
+    }
+
+    @Override
+    public void handleUpdateTag(CompoundTag tag, Provider registries) {
+        loadAdditional(tag, registries);
+    }
+
 
     public ComputerRackBlockEntity(BlockPos pos, BlockState blockState) {
         super(SNSBlockEntities.RACK_BLOCK_ENTITY.get(), pos, blockState);
