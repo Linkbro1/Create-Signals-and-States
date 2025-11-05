@@ -1,5 +1,8 @@
 package net.linkbro.createsignalsandstates.util;
 
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
+
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -37,6 +40,17 @@ public class BlockInteractionUtils {
             case SOUTH -> {return new Vec2((float)(15-(pixelCoords.x)),(float)pixelCoords.y);}
             case WEST -> {return new Vec2((float)(15-(pixelCoords.z)),(float)pixelCoords.y);}
             case null, default -> {return new Vec2(0,0);}
+        }
+    }
+
+    // this requires that the pose stack be at 0.5, 0.5, 0.5.
+    public static void applyFacingRotation(PoseStack poseStack, Direction facing) {
+        switch (facing) {
+            case NORTH -> poseStack.mulPose(Axis.YP.rotationDegrees(0));
+            case EAST -> poseStack.mulPose(Axis.YP.rotationDegrees(-90));
+            case SOUTH -> poseStack.mulPose(Axis.YP.rotationDegrees(180));
+            case WEST -> poseStack.mulPose(Axis.YP.rotationDegrees(90));
+            case null, default -> poseStack.mulPose(Axis.YP.rotationDegrees(0));
         }
     }
 

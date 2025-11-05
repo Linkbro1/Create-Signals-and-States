@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.client.renderer.entity.ItemRenderer;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -27,18 +28,20 @@ public class ComputerRackBlockEntityRenderer implements BlockEntityRenderer<Comp
         
         ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
         Level level = blockEntity.getLevel();
-        BlockPos frontPos = blockEntity.getBlockPos().relative(blockEntity.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING), 1);
-        BlockPos backPos = blockEntity.getBlockPos().relative(blockEntity.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING).getOpposite(), 1);
+        Direction facing = blockEntity.getBlockState().getValue(BlockStateProperties.HORIZONTAL_FACING);
+        BlockPos frontPos = blockEntity.getBlockPos().relative(facing, 1);
+        BlockPos backPos = blockEntity.getBlockPos().relative(facing.getOpposite(), 1);
 
         int frontLight = BlockInteractionUtils.lightAtPos(level, frontPos);
         int backLight = BlockInteractionUtils.lightAtPos(level, backPos);
 
-        // todo: loop over front modules
         for (int i = 0; i < 4; i++) {
             ItemStack slotStack = blockEntity.inventory.getStackInSlot(i);
 
             poseStack.pushPose();
-            poseStack.translate(2, 2+i, 2);
+            poseStack.translate(0.5, 0.5, 0.5);
+            BlockInteractionUtils.applyFacingRotation(poseStack,facing);
+            poseStack.translate(0.375-(0.25*i), 0, -0.53125); //these magic numbers are derived from 0.0625 = a pixel, 
             itemRenderer.renderStatic(slotStack, ItemDisplayContext.FIXED, frontLight, packedOverlay, poseStack, bufferSource, blockEntity.getLevel(), 1);
             poseStack.popPose();
         }
@@ -47,13 +50,13 @@ public class ComputerRackBlockEntityRenderer implements BlockEntityRenderer<Comp
             ItemStack slotStack = blockEntity.inventory.getStackInSlot(i);
 
             poseStack.pushPose();
-            poseStack.translate(1, 2+i, 2);
+            poseStack.translate(0.5, 0.5, 0.5);
+            BlockInteractionUtils.applyFacingRotation(poseStack,facing);
+            poseStack.translate(-0.375+(0.25*(i-4)), 0, 0.53125);
             poseStack.mulPose(Axis.YP.rotationDegrees(180f));
             itemRenderer.renderStatic(slotStack, ItemDisplayContext.FIXED, backLight, packedOverlay, poseStack, bufferSource, blockEntity.getLevel(), 1);
             poseStack.popPose();
         }
-
-        // todo: loop over back modules
 
     }
 
