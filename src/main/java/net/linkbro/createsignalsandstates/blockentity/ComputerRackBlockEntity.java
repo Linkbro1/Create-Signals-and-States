@@ -1,12 +1,15 @@
 package net.linkbro.createsignalsandstates.blockentity;
 
+import net.linkbro.createsignalsandstates.abstractclasses.Module;
+import net.linkbro.createsignalsandstates.abstractclasses.ModuleFactory;
 import net.linkbro.createsignalsandstates.util.BlockInteractionUtils;
 import net.linkbro.createsignalsandstates.util.SNSTags;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.Component;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -16,33 +19,55 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec2;
-import net.neoforged.neoforge.items.ItemStackHandler;
 
 public class ComputerRackBlockEntity extends BlockEntity {
-    public final ItemStackHandler inventory = new ItemStackHandler(8) {
-        @Override
-        public int getSlotLimit(int slot) {
-            return 1;
-        }
-
-        @Override
-        protected void onContentsChanged(int slot) {
-            setChanged();
-        };
-    };
+    public net.linkbro.createsignalsandstates.abstractclasses.Module[] frontModules = new Module[4];
+    public net.linkbro.createsignalsandstates.abstractclasses.Module[] backModules = new Module[4];
 
     @Override
     protected void saveAdditional(CompoundTag tag, Provider registries) {
         super.saveAdditional(tag, registries);
-        tag.put("Inventory", inventory.serializeNBT(registries));
+
+        ListTag frontModuleList = new ListTag();
+        for (net.linkbro.createsignalsandstates.abstractclasses.Module module : frontModules) {
+            if (module != null) {
+                frontModuleList.add(net.linkbro.createsignalsandstates.abstractclasses.Module.serializeNBT(module));
+            } else {
+                CompoundTag emptyTag = new CompoundTag();
+                frontModuleList.add(emptyTag);
+            }
+        }
+        tag.put("frontModuleList", frontModuleList);
+
+        ListTag backModuleList = new ListTag();
+        for (net.linkbro.createsignalsandstates.abstractclasses.Module module : backModules) {
+            if (module != null) {
+                backModuleList.add(net.linkbro.createsignalsandstates.abstractclasses.Module.serializeNBT(module));
+            } else {
+                CompoundTag emptyTag = new CompoundTag();
+                backModuleList.add(emptyTag);
+            }
+        }
+        tag.put("backModuleList", backModuleList);
     }
 
     @Override
     protected void loadAdditional(CompoundTag tag, Provider registries) {
         super.loadAdditional(tag, registries);
-        if (tag.contains("Inventory")) {
-            inventory.deserializeNBT(registries, tag.getCompound("Inventory"));
+
+        ListTag frontModuleList = tag.getList("frontModuleList", Tag.TAG_COMPOUND);
+        for (int i = 0; i < frontModuleList.size(); i++) {
+            CompoundTag moduleTag = frontModuleList.getCompound(i);
+            this.frontModules[i] = Module.deserializeNBT(moduleTag);
         }
+ 
+        
+        ListTag backModuleList = tag.getList("backModuleList", Tag.TAG_COMPOUND);
+        for (int i = 0; i < backModuleList.size(); i++) {
+            CompoundTag moduleTag = backModuleList.getCompound(i);
+            this.backModules[i] = Module.deserializeNBT(moduleTag);
+        }
+
     }
 
     @Override
@@ -80,20 +105,36 @@ public class ComputerRackBlockEntity extends BlockEntity {
     public void handleRightClick(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         int slot = getSlot(state,hitResult);
         if (slot == -1) return; // didn't hit either the back or the front.
-        ItemStack slotStack = inventory.extractItem(slot, 1, true);
 
-            if (!stack.isEmpty() && stack.is(SNSTags.Items.MODULES) && slotStack == ItemStack.EMPTY) {
-                inventory.insertItem(slot, stack.copy(), false);
+        if (!stack.isEmpty() && stack.is(SNSTags.Items.MODULES)) {
+            //TODO: handle modules that are more than one slot wide
+            if (slot <= 3 && frontModules[slot] == null) {
+                frontModules[slot] = ModuleFactory.moduleFromItemstack(stack);
                 stack.shrink(1);
-            } else if (stack.isEmpty()) {
-                player.setItemInHand(hand, slotStack);
-                inventory.setStackInSlot(slot, ItemStack.EMPTY);
+            } else if (backModules[slot-4] == null) {
+                backModules[slot-4] = ModuleFactory.moduleFromItemstack(stack);
+                stack.shrink(1);
             }
-
-
-        player.displayClientMessage(Component.literal("slot hit: " + slot),true);
+            this.setChanged();
+        }
+            //player.displayClientMessage(Component.literal("slot hit: " + slot),true);
     }
 
     public void handleShiftRightClick(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+        int slot = getSlot(state, hitResult);
+        if (slot == -1) return;
+        ItemStack returnItem = ItemStack.EMPTY;
+
+        if (stack.isEmpty()) {
+            if (slot <= 3) {
+                returnItem = ModuleFactory.ItemStackFromModule(frontModules[slot]);
+                frontModules[slot] = null;
+            } else{
+                returnItem = ModuleFactory.ItemStackFromModule(backModules[slot-4]);
+                backModules[slot-4] = null;
+            }
+            player.setItemInHand(hand, returnItem);
+            this.setChanged();
+        }
     }
 }
