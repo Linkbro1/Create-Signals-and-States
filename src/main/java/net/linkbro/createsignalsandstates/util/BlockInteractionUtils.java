@@ -15,6 +15,9 @@ import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 
 public class BlockInteractionUtils {
+
+    public static double VoxelLength = 0.0625;
+
     public static Vec3 getPixelCoordsFromHit(BlockHitResult hitResult) {
         Vec3 hitPos = hitResult.getLocation();
         BlockPos blockPos = hitResult.getBlockPos();

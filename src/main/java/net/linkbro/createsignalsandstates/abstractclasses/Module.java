@@ -12,7 +12,7 @@ public abstract class Module {
 
     public abstract void process();
 
-    public static CompoundTag serializeNBT(Module module) {
+    public static CompoundTag serializeNBT(Module module) { //TODO: move these, these aren't meant to be here
         CompoundTag tag = new CompoundTag();
         tag.putString("itemName", module.itemName);
         
