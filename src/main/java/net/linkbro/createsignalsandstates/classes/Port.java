@@ -1,4 +1,4 @@
-package net.linkbro.createsignalsandstates.abstractclasses;
+package net.linkbro.createsignalsandstates.classes;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.phys.Vec2;
@@ -7,7 +7,7 @@ public class Port {
     public int value;
     public Vec2 position;
 
-    public Port(int x, int y){
+    public Port(int x, int y) {
         this.position = new Vec2(x, y);
         this.value = 0;
     }
@@ -15,8 +15,8 @@ public class Port {
     public static CompoundTag serializeNBT(Port port) {
         CompoundTag tag = new CompoundTag();
         tag.putInt("value", port.value);
-        tag.putInt("posX", (int)port.position.x);
-        tag.putInt("posY", (int)port.position.y);
+        tag.putInt("posX", (int) port.position.x);
+        tag.putInt("posY", (int) port.position.y);
         return tag;
     }
 

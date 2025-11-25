@@ -1,4 +1,4 @@
-package net.linkbro.createsignalsandstates.abstractclasses;
+package net.linkbro.createsignalsandstates.classes;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -12,20 +12,19 @@ public abstract class Module {
 
     public abstract void process();
 
-    public static CompoundTag serializeNBT(Module module) { //TODO: move these, these aren't meant to be here
+    public static CompoundTag serializeNBT(Module module) { // TODO: move these, these aren't meant to be here
         CompoundTag tag = new CompoundTag();
         tag.putString("itemName", module.itemName);
-        
+
         ListTag inputList = new ListTag();
         for (Port inPort : module.input) {
             inputList.add(Port.serializeNBT(inPort));
         }
         tag.put("inputList", inputList);
 
-
         ListTag outputList = new ListTag();
         for (Port outPort : module.output) {
-            inputList.add(Port.serializeNBT(outPort));                
+            inputList.add(Port.serializeNBT(outPort));
         }
         tag.put("outputList", outputList);
 
@@ -35,7 +34,7 @@ public abstract class Module {
     public static Module deserializeNBT(CompoundTag compoundTag) {
         String itemName = compoundTag.getString("itemName");
         Module module = ModuleFactory.moduleFromItemName(itemName);
-        
+
         ListTag inputList = compoundTag.getList("inputList", Tag.TAG_COMPOUND);
         for (int i = 0; i < inputList.size() && i < module.input.length; i++) {
             module.input[i] = Port.deserializeNBT(inputList.getCompound(i));

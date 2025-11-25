@@ -1,7 +1,9 @@
 package net.linkbro.createsignalsandstates.blockentity;
 
-import net.linkbro.createsignalsandstates.abstractclasses.Module;
-import net.linkbro.createsignalsandstates.abstractclasses.ModuleFactory;
+import net.linkbro.createsignalsandstates.block.ComputerRack;
+import net.linkbro.createsignalsandstates.classes.Module;
+import net.linkbro.createsignalsandstates.classes.ModuleFactory;
+import net.linkbro.createsignalsandstates.classes.SlotOnRack;
 import net.linkbro.createsignalsandstates.util.BlockInteractionUtils;
 import net.linkbro.createsignalsandstates.util.SNSTags;
 import net.minecraft.core.BlockPos;
@@ -94,7 +96,7 @@ public class ComputerRackBlockEntity extends BlockEntity {
         if (!stack.isEmpty() && stack.is(SNSTags.Items.MODULES)) {
             // frontModules[slot] = ModuleFactory.moduleFromItemstack(stack);
             Module module = ModuleFactory.moduleFromItemstack(stack);
-            if (addModule(module, slot)) {
+            if (addModule(module, this, slot) && !player.isCreative()) {
                 stack.shrink(1);
             }
         }
@@ -112,13 +114,13 @@ public class ComputerRackBlockEntity extends BlockEntity {
             if (slot <= 3) {
                 returnItem = ModuleFactory.ItemStackFromModule(frontModules[slot]);
                 // frontModules[slot] = null;
-                if (removeModule(frontModules[slot], slot, 0)) {
+                if (removeModule(frontModules[slot], this, slot, 0) && !player.isCreative()) {
                     player.setItemInHand(hand, returnItem);
                 }
             } else {
                 returnItem = ModuleFactory.ItemStackFromModule(backModules[slot - 4]);
                 // backModules[slot-4] = null;
-                if (removeModule(backModules[slot - 4], slot - 4, 0)) {
+                if (removeModule(backModules[slot - 4], this, slot - 4, 0) && !player.isCreative()) {
                     player.setItemInHand(hand, returnItem);
                 }
             }
@@ -126,52 +128,70 @@ public class ComputerRackBlockEntity extends BlockEntity {
         }
     }
 
-    public boolean addModule(Module module, int slot) {
-        if (slot <= 3) {
-            boolean isRoom = true;
-            for (int i = 0; i < module.width; i++) {
-                if (slot + i >= frontModules.length || frontModules[slot + i] != null) {
+    public boolean addModule(Module module, ComputerRackBlockEntity rack, int slot) { // TODO: work this bs out
+        boolean isRoom = true;
+        boolean front = (slot <= 3 && slot >= 0);
+        ComputerRackBlockEntity mainRack = rack;
+        int mainSlot = slot;
+        SlotOnRack nextSOR = getNextSlot(this, mainSlot, front);
+        if (nextSOR.slot == -1) {
+            return false;
+        }
+
+        if (front) {
+            for (int i = 0; i < module.width - 1; i++) {
+                if (nextSOR.rack.frontModules[nextSOR.slot] != null) {
                     isRoom = false;
                 }
+                nextSOR = getNextSlot(nextSOR.rack, nextSOR.slot, front);
             }
-
+            nextSOR = getNextSlot(mainRack, mainSlot, front);
             if (isRoom) {
-                for (int i = 0; i < module.width; i++) {
-                    frontModules[slot + i] = module;
+                mainRack.frontModules[mainSlot] = module;
+                for (int i = 0; i < module.width - 1; i++) {
+                    nextSOR.rack.frontModules[nextSOR.slot] = module;
+                    nextSOR = getNextSlot(nextSOR.rack, nextSOR.slot, front);
                 }
-                this.setChanged();
                 return true;
+            } else {
+                return false;
             }
         } else {
-            boolean isRoom = true;
-            for (int i = 0; i < module.width; i++) {
-                if ((slot - 4) + i >= backModules.length || backModules[(slot - 4) + i] != null) {
+            for (int i = 0; i < module.width - 1; i++) {
+                if (nextSOR.rack.backModules[nextSOR.slot - 4] != null) {
                     isRoom = false;
                 }
+                nextSOR = getNextSlot(nextSOR.rack, mainSlot, front);
             }
-
+            nextSOR = getNextSlot(mainRack, mainSlot, front);
             if (isRoom) {
-                for (int i = 0; i < module.width; i++) {
-                    backModules[(slot - 4) + i] = module;
+                mainRack.backModules[mainSlot - 4] = module;
+                for (int i = 0; i < module.width - 1; i++) {
+                    nextSOR.rack.backModules[nextSOR.slot - 4] = module;
+                    nextSOR = getNextSlot(nextSOR.rack, nextSOR.slot, front);
                 }
-                this.setChanged();
                 return true;
+            } else {
+                return false;
             }
         }
-        return false;
+
     }
 
-    public boolean removeModule(Module module, int slot, int generation) {
+    public boolean removeModule(Module module, ComputerRackBlockEntity rack, int slot, int generation) {
         if (generation >= 250 || module == null)
             return false; // just in case.
+        SlotOnRack nextSOR = getNextSlot(rack, slot, true);
+        SlotOnRack prevSOR = getPrevSlot(rack, slot, true);
+
         if (slot >= 0 && slot <= 3 && frontModules[slot] == module) {
             frontModules[slot] = null;
-            removeModule(module, slot + 1, generation + 1);
-            removeModule(module, slot - 1, generation + 1);
+            removeModule(module, this, slot + 1, generation + 1);
+            removeModule(module, this, slot - 1, generation + 1);
         } else if (slot >= 0 && slot <= 3 && backModules[slot] == module) {
             backModules[slot] = null;
-            removeModule(module, slot + 1, generation + 1);
-            removeModule(module, slot - 1, generation + 1);
+            removeModule(module, this, slot + 1, generation + 1);
+            removeModule(module, this, slot - 1, generation + 1);
         }
 
         if (generation != 0) {
@@ -195,6 +215,70 @@ public class ComputerRackBlockEntity extends BlockEntity {
                                   // can use the frontSlot value to move backwards from 7 to get it.
         } else {
             return -1; // the player didn't hit either the back or front slots, return an invalid slot.
+        }
+    }
+
+    public SlotOnRack getNextSlot(ComputerRackBlockEntity rack, int slot, boolean front) {
+        Direction nextFacing = this.getBlockState().getValue(ComputerRack.FACING).getCounterClockWise();
+        Direction prevFacing = this.getBlockState().getValue(ComputerRack.FACING).getClockWise();
+        BlockEntity nextBE;
+        ComputerRackBlockEntity nextRack;
+
+        if (rack == this && !(slot == 3 || slot == 7)) {
+            return new SlotOnRack(this, slot + 1);
+        } else {
+            if (front) {
+                nextBE = level.getBlockEntity(this.worldPosition.relative(nextFacing, 1));
+                if (!(nextBE == null) && nextBE instanceof ComputerRackBlockEntity) {
+                    nextRack = (ComputerRackBlockEntity) level
+                            .getBlockEntity(this.worldPosition.relative(nextFacing, 1));
+                } else {
+                    return new SlotOnRack(this, -1);
+                }
+                return new SlotOnRack(nextRack, 0);
+
+            } else {
+                nextBE = level.getBlockEntity(this.worldPosition.relative(prevFacing, 1));
+                if (!(nextBE == null) && nextBE instanceof ComputerRackBlockEntity) {
+                    nextRack = (ComputerRackBlockEntity) level
+                            .getBlockEntity(this.worldPosition.relative(prevFacing, 1));
+                } else {
+                    return new SlotOnRack(this, -1);
+                }
+                return new SlotOnRack(nextRack, 4);
+            }
+        }
+    }
+
+    public SlotOnRack getPrevSlot(ComputerRackBlockEntity rack, int slot, boolean front) {
+        Direction nextFacing = this.getBlockState().getValue(ComputerRack.FACING).getCounterClockWise();
+        Direction prevFacing = this.getBlockState().getValue(ComputerRack.FACING).getClockWise();
+        BlockEntity prevBE;
+        ComputerRackBlockEntity prevRack;
+
+        if (rack == this && !(slot == 0 || slot == 4)) {
+            return new SlotOnRack(this, slot - 1);
+        } else {
+            if (front) {
+                prevBE = level.getBlockEntity(this.worldPosition.relative(prevFacing, 1));
+                if (!(prevBE == null) && prevBE instanceof ComputerRackBlockEntity) {
+                    prevRack = (ComputerRackBlockEntity) level
+                            .getBlockEntity(this.worldPosition.relative(prevFacing, 1));
+                } else {
+                    return new SlotOnRack(this, -1);
+                }
+                return new SlotOnRack(prevRack, 3);
+
+            } else {
+                prevBE = level.getBlockEntity(this.worldPosition.relative(nextFacing, 1));
+                if (!(prevBE == null) && prevBE instanceof ComputerRackBlockEntity) {
+                    prevRack = (ComputerRackBlockEntity) level
+                            .getBlockEntity(this.worldPosition.relative(nextFacing, 1));
+                } else {
+                    return new SlotOnRack(this, -1);
+                }
+                return new SlotOnRack(prevRack, 3);
+            }
         }
     }
 

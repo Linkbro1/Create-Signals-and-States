@@ -3,8 +3,9 @@ package net.linkbro.createsignalsandstates.blockentity.renderer;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 
-import net.linkbro.createsignalsandstates.abstractclasses.ModuleFactory;
 import net.linkbro.createsignalsandstates.blockentity.ComputerRackBlockEntity;
+import net.linkbro.createsignalsandstates.classes.ModuleFactory;
+import net.linkbro.createsignalsandstates.classes.SlotOnRack;
 import net.linkbro.createsignalsandstates.util.BlockInteractionUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
@@ -40,11 +41,15 @@ public class ComputerRackBlockEntityRenderer implements BlockEntityRenderer<Comp
 
         if (blockEntity.frontModules.length >= 3) {
             for (int i = 0; i < 4; i++) {
-                net.linkbro.createsignalsandstates.abstractclasses.Module module = blockEntity.frontModules[i];
+                SlotOnRack previousSOR = blockEntity.getPrevSlot(blockEntity, i, true);
+                net.linkbro.createsignalsandstates.classes.Module module = blockEntity.frontModules[i];
+
+                // assume we should render nothing, then if the previous Block wasn't another
+                // rack, or if it was a rack and the slot isn't occupied by an earlier instance,
+                // change that assumption to the relevant itemstack.
                 ItemStack slotStack = ItemStack.EMPTY;
-                if (i - 1 < 0) {
-                    slotStack = ModuleFactory.ItemStackFromModule(module);
-                } else if (blockEntity.frontModules[i - 1] != module) {
+                if ((previousSOR.rack == blockEntity && previousSOR.slot == -1)
+                        || (previousSOR.slot != -1 && previousSOR.rack.frontModules[previousSOR.slot] != module)) {
                     slotStack = ModuleFactory.ItemStackFromModule(module);
                 }
 
@@ -66,14 +71,26 @@ public class ComputerRackBlockEntityRenderer implements BlockEntityRenderer<Comp
                 if (blockEntity.backModules.length < 4) {
                     break;
                 }
-                net.linkbro.createsignalsandstates.abstractclasses.Module module = blockEntity.backModules[i];
+                SlotOnRack previousSOR = blockEntity.getPrevSlot(blockEntity, i, false);
+                net.linkbro.createsignalsandstates.classes.Module module = blockEntity.backModules[i];
 
+                // ItemStack slotStack = ItemStack.EMPTY;
+                // if ((previousSOR.rack == blockEntity && previousSOR.slot == -1)
+                // || (previousSOR.slot != -1 && previousSOR.rack.frontModules[previousSOR.slot]
+                // != module)) {
+                // slotStack = ModuleFactory.ItemStackFromModule(module);
+                // }
                 ItemStack slotStack = ItemStack.EMPTY;
-                if (i - 1 < 0) {
-                    slotStack = ModuleFactory.ItemStackFromModule(module);
-                } else if (blockEntity.backModules[i - 1] != module) {
+                if ((previousSOR.rack == blockEntity && previousSOR.slot == -1)
+                        || (previousSOR.slot != -1 && previousSOR.rack.backModules[previousSOR.slot] != module)) {
                     slotStack = ModuleFactory.ItemStackFromModule(module);
                 }
+
+                // if (i - 1 < 0) {
+                // slotStack = ModuleFactory.ItemStackFromModule(module);
+                // } else if (blockEntity.backModules[i - 1] != module) {
+                // slotStack = ModuleFactory.ItemStackFromModule(module);
+                // }
 
                 double slotOffset = (4 * pixel) * i;
                 double widthOffset = module != null ? (2 * pixel) * (module.width - 1) : 0;

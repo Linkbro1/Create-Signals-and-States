@@ -1,4 +1,4 @@
-package net.linkbro.createsignalsandstates.abstractclasses;
+package net.linkbro.createsignalsandstates.classes;
 
 import net.linkbro.createsignalsandstates.component.SNSDataComponents;
 import net.linkbro.createsignalsandstates.item.SNSItems;
@@ -62,7 +62,9 @@ public class ModuleFactory {
     }
 
     public static ItemStack ItemStackFromModule(Module module) {
-        if (module == null) {return ItemStack.EMPTY;}
+        if (module == null) {
+            return ItemStack.EMPTY;
+        }
         String itemName = module.itemName;
         switch (itemName) {
             case "sum_module":
