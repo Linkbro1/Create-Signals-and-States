@@ -120,7 +120,7 @@ public class ComputerRackBlockEntity extends BlockEntity {
             } else {
                 returnItem = ModuleFactory.ItemStackFromModule(backModules[slot - 4]);
                 // backModules[slot-4] = null;
-                if (removeModule(backModules[slot - 4], this, slot - 4, 0) && !player.isCreative()) {
+                if (removeModule(backModules[slot - 4], this, slot, 0) && !player.isCreative()) {
                     player.setItemInHand(hand, returnItem);
                 }
             }
@@ -181,17 +181,23 @@ public class ComputerRackBlockEntity extends BlockEntity {
     public boolean removeModule(Module module, ComputerRackBlockEntity rack, int slot, int generation) {
         if (generation >= 250 || module == null)
             return false; // just in case.
-        SlotOnRack nextSOR = getNextSlot(rack, slot, true);
-        SlotOnRack prevSOR = getPrevSlot(rack, slot, true);
-
+        SlotOnRack nextSOR;
+        SlotOnRack prevSOR;
+        
         if (slot >= 0 && slot <= 3 && frontModules[slot] == module) {
+            nextSOR = getNextSlot(rack, slot, true);
+            prevSOR = getPrevSlot(rack, slot, true);
+            
             frontModules[slot] = null;
-            removeModule(module, this, slot + 1, generation + 1);
-            removeModule(module, this, slot - 1, generation + 1);
-        } else if (slot >= 0 && slot <= 3 && backModules[slot] == module) {
-            backModules[slot] = null;
-            removeModule(module, this, slot + 1, generation + 1);
-            removeModule(module, this, slot - 1, generation + 1);
+            nextSOR.rack.removeModule(module, nextSOR.rack, nextSOR.slot, generation + 1);
+            prevSOR.rack.removeModule(module, prevSOR.rack, prevSOR.slot, generation + 1);
+        } else if (slot >= 4 && slot <= 7 && backModules[slot - 4] == module) {
+            nextSOR = getNextSlot(rack, slot, false);
+            prevSOR = getPrevSlot(rack, slot, false);
+            
+            backModules[slot - 4] = null;
+            nextSOR.rack.removeModule(module, nextSOR.rack, nextSOR.slot, generation + 1);
+            prevSOR.rack.removeModule(module, prevSOR.rack, prevSOR.slot, generation + 1);
         }
 
         if (generation != 0) {
@@ -277,7 +283,7 @@ public class ComputerRackBlockEntity extends BlockEntity {
                 } else {
                     return new SlotOnRack(this, -1);
                 }
-                return new SlotOnRack(prevRack, 3);
+                return new SlotOnRack(prevRack, 7);
             }
         }
     }

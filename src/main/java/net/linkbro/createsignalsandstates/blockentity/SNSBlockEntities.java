@@ -13,12 +13,10 @@ public class SNSBlockEntities {
     public static final DeferredRegister<BlockEntityType<?>> BLOCK_ENTITIES =
             DeferredRegister.create(BuiltInRegistries.BLOCK_ENTITY_TYPE, CreateSignalsAndStates.MODID);
 
-    @SuppressWarnings("null")
 public static final Supplier<BlockEntityType<ComputerControllerBlockEntity>> CONTROLLER_BLOCK_ENTITY =
             BLOCK_ENTITIES.register("controller_block_entity", () -> BlockEntityType.Builder.of(
                     ComputerControllerBlockEntity::new, SNSBlocks.COMPUTER_CONTROLLER.get()).build(null));
 
-    @SuppressWarnings("null")
 public static final Supplier<BlockEntityType<ComputerRackBlockEntity>> RACK_BLOCK_ENTITY =
             BLOCK_ENTITIES.register("rack_block_entity", () -> BlockEntityType.Builder.of(
                     ComputerRackBlockEntity::new, SNSBlocks.COMPUTER_RACK.get()).build(null));

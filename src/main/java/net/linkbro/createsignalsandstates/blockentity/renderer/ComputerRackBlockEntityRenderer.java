@@ -71,7 +71,7 @@ public class ComputerRackBlockEntityRenderer implements BlockEntityRenderer<Comp
                 if (blockEntity.backModules.length < 4) {
                     break;
                 }
-                SlotOnRack previousSOR = blockEntity.getPrevSlot(blockEntity, i, false);
+                SlotOnRack previousSOR = blockEntity.getPrevSlot(blockEntity, i+4, false);
                 net.linkbro.createsignalsandstates.classes.Module module = blockEntity.backModules[i];
 
                 // ItemStack slotStack = ItemStack.EMPTY;
@@ -82,7 +82,7 @@ public class ComputerRackBlockEntityRenderer implements BlockEntityRenderer<Comp
                 // }
                 ItemStack slotStack = ItemStack.EMPTY;
                 if ((previousSOR.rack == blockEntity && previousSOR.slot == -1)
-                        || (previousSOR.slot != -1 && previousSOR.rack.backModules[previousSOR.slot] != module)) {
+                        || (previousSOR.slot != -1 && previousSOR.rack.backModules[previousSOR.slot-4] != module)) {
                     slotStack = ModuleFactory.ItemStackFromModule(module);
                 }
 
