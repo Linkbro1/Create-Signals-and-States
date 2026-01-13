@@ -10,7 +10,7 @@ import net.minecraft.world.level.block.Block;
 
 public class SNSTags {
     public static class Blocks {
-
+        public static TagKey<Block> COMPUTERBLOCKS = createTag("computer_blocks");
 
         private static TagKey<Block> createTag(String name) {
             return BlockTags.create(ResourceLocation.fromNamespaceAndPath(CreateSignalsAndStates.MODID,name));
