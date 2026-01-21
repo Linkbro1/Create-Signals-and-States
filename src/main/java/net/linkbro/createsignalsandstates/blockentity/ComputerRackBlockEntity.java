@@ -29,25 +29,34 @@ public class ComputerRackBlockEntity extends BlockEntity {
     @Override
     protected void saveAdditional(CompoundTag tag, Provider registries) {
         super.saveAdditional(tag, registries);
-
         ListTag frontModuleList = new ListTag();
-        for (Module module : frontModules) {
-            if (module != null) {
-                frontModuleList.add(Module.serializeNBT(module));
-            } else {
-                CompoundTag emptyTag = new CompoundTag();
+        ListTag backModuleList = new ListTag();
+        CompoundTag emptyTag = new CompoundTag();
+
+        for (int i = 0; i < frontModules.length; i++) {
+            Module module = frontModules[i];
+            SlotOnRack prevSOR = getPrevSlot(this, i, true);
+            Module prevModule = prevSOR.slot != -1 ? prevSOR.rack.frontModules[prevSOR.slot] : null;
+
+            if (module == null || module == prevModule) {
                 frontModuleList.add(emptyTag);
+            } else {
+                frontModuleList.add(Module.serializeNBT(module));
             }
         }
         tag.put("frontModuleList", frontModuleList);
+        
+        for (int i = 0; i < backModules.length; i++) {
+            Module module = backModules[i];
+            SlotOnRack prevSOR = getPrevSlot(this, i, false);
+            prevSOR.slot = prevSOR.slot > 4 ? prevSOR.slot - 4 : prevSOR.slot; //kinda hacky
+            Module prevModule = prevSOR.slot != -1 ? prevSOR.rack.backModules[prevSOR.slot] : null;
 
-        ListTag backModuleList = new ListTag();
-        for (Module module : backModules) {
-            if (module != null) {
-                backModuleList.add(Module.serializeNBT(module));
-            } else {
-                CompoundTag emptyTag = new CompoundTag();
+            if (module == null || module == prevModule) {
                 backModuleList.add(emptyTag);
+            } else {
+
+                backModuleList.add(Module.serializeNBT(module));
             }
         }
         tag.put("backModuleList", backModuleList);
@@ -59,14 +68,19 @@ public class ComputerRackBlockEntity extends BlockEntity {
 
         ListTag frontModuleList = tag.getList("frontModuleList", Tag.TAG_COMPOUND);
         for (int i = 0; i < frontModuleList.size(); i++) {
-            CompoundTag moduleTag = frontModuleList.getCompound(i);
-            this.frontModules[i] = Module.deserializeNBT(moduleTag);
+            Module module = Module.deserializeNBT(frontModuleList.getCompound(i));
+            if (module != null) {
+                addModule(module, this, i);
+            }
+            //this.frontModules[i] = Module.deserializeNBT(moduleTag);
         }
 
         ListTag backModuleList = tag.getList("backModuleList", Tag.TAG_COMPOUND);
         for (int i = 0; i < backModuleList.size(); i++) {
-            CompoundTag moduleTag = backModuleList.getCompound(i);
-            this.backModules[i] = Module.deserializeNBT(moduleTag);
+            Module module = Module.deserializeNBT(backModuleList.getCompound(i));
+            if (module != null) {
+                addModule(module, this, i+4);
+            }
         }
 
     }
@@ -124,7 +138,6 @@ public class ComputerRackBlockEntity extends BlockEntity {
                     player.setItemInHand(hand, returnItem);
                 }
             }
-            this.setChanged();
         }
     }
 
@@ -134,7 +147,7 @@ public class ComputerRackBlockEntity extends BlockEntity {
         ComputerRackBlockEntity mainRack = rack;
         int mainSlot = slot;
         SlotOnRack nextSOR = getNextSlot(this, mainSlot, front);
-        if (nextSOR.slot == -1) {
+        if (nextSOR.slot == -1 && module.width > 1) {
             return false;
         }
 
@@ -146,12 +159,16 @@ public class ComputerRackBlockEntity extends BlockEntity {
                 nextSOR = getNextSlot(nextSOR.rack, nextSOR.slot, front);
             }
             nextSOR = getNextSlot(mainRack, mainSlot, front);
+            if (mainRack.frontModules[mainSlot] != null) {
+                isRoom = false;
+            }
             if (isRoom) {
                 mainRack.frontModules[mainSlot] = module;
                 for (int i = 0; i < module.width - 1; i++) {
                     nextSOR.rack.frontModules[nextSOR.slot] = module;
                     nextSOR = getNextSlot(nextSOR.rack, nextSOR.slot, front);
                 }
+                this.setChanged();
                 return true;
             } else {
                 return false;
@@ -164,18 +181,21 @@ public class ComputerRackBlockEntity extends BlockEntity {
                 nextSOR = getNextSlot(nextSOR.rack, mainSlot, front);
             }
             nextSOR = getNextSlot(mainRack, mainSlot, front);
+            if (mainRack.backModules[mainSlot - 4] != null) {
+                isRoom = false;
+            }
             if (isRoom) {
                 mainRack.backModules[mainSlot - 4] = module;
                 for (int i = 0; i < module.width - 1; i++) {
                     nextSOR.rack.backModules[nextSOR.slot - 4] = module;
                     nextSOR = getNextSlot(nextSOR.rack, nextSOR.slot, front);
                 }
+                this.setChanged();
                 return true;
             } else {
                 return false;
             }
         }
-
     }
 
     public boolean removeModule(Module module, ComputerRackBlockEntity rack, int slot, int generation) {
@@ -203,6 +223,7 @@ public class ComputerRackBlockEntity extends BlockEntity {
         if (generation != 0) {
             return false;
         } else {
+            this.setChanged();
             return true;
         }
     }
