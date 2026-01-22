@@ -26,11 +26,11 @@ public class BlockInteractionUtils {
         double relY = hitPos.y - blockPos.getY();
         double relZ = hitPos.z - blockPos.getZ();
 
-        double pixelX = (int)(16*relX);
-        double pixelY = (int)(16*relY);
-        double pixelZ = (int)(16*relZ);
+        double pixelX = (int) (16 * relX);
+        double pixelY = (int) (16 * relY);
+        double pixelZ = (int) (16 * relZ);
 
-        return new Vec3(pixelX,pixelY,pixelZ);
+        return new Vec3(pixelX, pixelY, pixelZ);
     }
 
     public static Vec2 getFrontFaceCoords(BlockState state, BlockHitResult hitResult) {
@@ -38,26 +38,36 @@ public class BlockInteractionUtils {
         Direction facing = state.getValue(BlockStateProperties.HORIZONTAL_FACING).getOpposite();
 
         switch (facing) {
-            case NORTH -> {return new Vec2((float)(pixelCoords.x),(float)pixelCoords.y);}
-            case EAST -> {return new Vec2((float)(pixelCoords.z),(float)pixelCoords.y);}
-            case SOUTH -> {return new Vec2((float)(15-(pixelCoords.x)),(float)pixelCoords.y);}
-            case WEST -> {return new Vec2((float)(15-(pixelCoords.z)),(float)pixelCoords.y);}
-            case null, default -> {return new Vec2(0,0);}
+        case NORTH -> {
+            return new Vec2((float) (pixelCoords.x), (float) pixelCoords.y);
+        }
+        case EAST -> {
+            return new Vec2((float) (pixelCoords.z), (float) pixelCoords.y);
+        }
+        case SOUTH -> {
+            return new Vec2((float) (15 - (pixelCoords.x)), (float) pixelCoords.y);
+        }
+        case WEST -> {
+            return new Vec2((float) (15 - (pixelCoords.z)), (float) pixelCoords.y);
+        }
+        case null, default -> {
+            return new Vec2(0, 0);
+        }
         }
     }
 
     // this requires that the pose stack be at 0.5, 0.5, 0.5.
     public static void applyFacingRotation(PoseStack poseStack, Direction facing) {
         switch (facing) {
-            case NORTH -> poseStack.mulPose(Axis.YP.rotationDegrees(0));
-            case EAST -> poseStack.mulPose(Axis.YP.rotationDegrees(-90));
-            case SOUTH -> poseStack.mulPose(Axis.YP.rotationDegrees(180));
-            case WEST -> poseStack.mulPose(Axis.YP.rotationDegrees(90));
-            case null, default -> poseStack.mulPose(Axis.YP.rotationDegrees(0));
+        case NORTH -> poseStack.mulPose(Axis.YP.rotationDegrees(0));
+        case EAST -> poseStack.mulPose(Axis.YP.rotationDegrees(-90));
+        case SOUTH -> poseStack.mulPose(Axis.YP.rotationDegrees(180));
+        case WEST -> poseStack.mulPose(Axis.YP.rotationDegrees(90));
+        case null, default -> poseStack.mulPose(Axis.YP.rotationDegrees(0));
         }
     }
 
     public static int lightAtPos(Level level, BlockPos pos) {
-        return LightTexture.pack( level.getBrightness(LightLayer.BLOCK, pos) , level.getBrightness(LightLayer.SKY, pos));
+        return LightTexture.pack(level.getBrightness(LightLayer.BLOCK, pos), level.getBrightness(LightLayer.SKY, pos));
     }
 }

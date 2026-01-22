@@ -28,7 +28,8 @@ public class ComputerRackBlockEntity extends BlockEntity {
     public Module[] backModules = new Module[4];
 
     @Override
-    protected void saveAdditional(CompoundTag tag, Provider registries) { //TODO: fix this, something here is fucked, it doesn't let the world save right 
+    protected void saveAdditional(CompoundTag tag, Provider registries) { // TODO: fix this, something here is fucked,
+                                                                          // it doesn't let the world save right
         super.saveAdditional(tag, registries);
         ListTag frontModuleList = new ListTag();
         ListTag backModuleList = new ListTag();
@@ -46,11 +47,11 @@ public class ComputerRackBlockEntity extends BlockEntity {
             }
         }
         tag.put("frontModuleList", frontModuleList);
-        
+
         for (int i = 0; i < backModules.length; i++) {
             Module module = backModules[i];
             SlotOnRack prevSOR = getPrevSlot(this, i, false);
-            prevSOR.slot = prevSOR.slot > 4 ? prevSOR.slot - 4 : prevSOR.slot; //kinda hacky
+            prevSOR.slot = prevSOR.slot > 4 ? prevSOR.slot - 4 : prevSOR.slot; // kinda hacky
             Module prevModule = prevSOR.slot != -1 ? prevSOR.rack.backModules[prevSOR.slot] : null;
 
             if (module == null || module == prevModule) {
@@ -72,14 +73,14 @@ public class ComputerRackBlockEntity extends BlockEntity {
             if (module != null) {
                 addModule(module, this, i);
             }
-            //this.frontModules[i] = Module.deserializeNBT(moduleTag);
+            // this.frontModules[i] = Module.deserializeNBT(moduleTag);
         }
 
         ListTag backModuleList = tag.getList("backModuleList", Tag.TAG_COMPOUND);
         for (int i = 0; i < backModuleList.size(); i++) {
             Module module = SerializationUtils.deserializeModule(backModuleList.getCompound(i));
             if (module != null) {
-                addModule(module, this, i+4);
+                addModule(module, this, i + 4);
             }
         }
 
@@ -103,7 +104,7 @@ public class ComputerRackBlockEntity extends BlockEntity {
 
     public void handleRightClick(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
             InteractionHand hand, BlockHitResult hitResult) {
-        int slot = getSlot(state, hitResult);
+        int slot = getSlot(this, state, hitResult).slot;
         if (slot == -1)
             return; // didn't hit either the back or the front.
 
@@ -119,7 +120,7 @@ public class ComputerRackBlockEntity extends BlockEntity {
 
     public void handleShiftRightClick(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
             InteractionHand hand, BlockHitResult hitResult) {
-        int slot = getSlot(state, hitResult);
+        int slot = getSlot(this, state, hitResult).slot;
         if (slot == -1)
             return;
         ItemStack returnItem = ItemStack.EMPTY;
@@ -203,18 +204,18 @@ public class ComputerRackBlockEntity extends BlockEntity {
             return false; // just in case.
         SlotOnRack nextSOR;
         SlotOnRack prevSOR;
-        
+
         if (slot >= 0 && slot <= 3 && frontModules[slot] == module) {
             nextSOR = getNextSlot(rack, slot, true);
             prevSOR = getPrevSlot(rack, slot, true);
-            
+
             frontModules[slot] = null;
             nextSOR.rack.removeModule(module, nextSOR.rack, nextSOR.slot, generation + 1);
             prevSOR.rack.removeModule(module, prevSOR.rack, prevSOR.slot, generation + 1);
         } else if (slot >= 4 && slot <= 7 && backModules[slot - 4] == module) {
             nextSOR = getNextSlot(rack, slot, false);
             prevSOR = getPrevSlot(rack, slot, false);
-            
+
             backModules[slot - 4] = null;
             nextSOR.rack.removeModule(module, nextSOR.rack, nextSOR.slot, generation + 1);
             prevSOR.rack.removeModule(module, prevSOR.rack, prevSOR.slot, generation + 1);
@@ -228,20 +229,23 @@ public class ComputerRackBlockEntity extends BlockEntity {
         }
     }
 
-    public int getSlot(BlockState state, BlockHitResult hitResult) {
+    public SlotOnRack getSlot(ComputerRackBlockEntity rack, BlockState state, BlockHitResult hitResult) {
         Vec2 frontCoords = BlockInteractionUtils.getFrontFaceCoords(state, hitResult);
         Direction hitFacing = hitResult.getDirection();
         Direction blockFacing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
         int frontSlot = (int) frontCoords.x / 4; // divide the area into four equal strips horizontally
 
         if (hitFacing == blockFacing) {
-            return frontSlot; // the player hit one of the front slots, so we don't need to do anything else
-                              // after division
+            return new SlotOnRack(rack, frontSlot); // the player hit one of the front slots, so we don't need to do
+                                                    // anything else
+            // after division
         } else if (hitFacing == blockFacing.getOpposite()) {
-            return 7 - frontSlot; // the player wanted the back slots, but the back slots increment in reverse, we
-                                  // can use the frontSlot value to move backwards from 7 to get it.
+            return new SlotOnRack(rack, 7 - frontSlot); // the player wanted the back slots, but the back slots
+                                                        // increment in reverse, we
+            // can use the frontSlot value to move backwards from 7 to get it.
         } else {
-            return -1; // the player didn't hit either the back or front slots, return an invalid slot.
+            return new SlotOnRack(this, -1); // the player didn't hit either the back or front slots, return an invalid
+                                             // slot.
         }
     }
 

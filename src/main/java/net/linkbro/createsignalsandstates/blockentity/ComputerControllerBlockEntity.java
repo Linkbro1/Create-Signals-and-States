@@ -40,11 +40,12 @@ public class ComputerControllerBlockEntity extends KineticBlockEntity {
     }
 
     private boolean tock = false;
+
     public void computerTick() {
         if (!tock) {
-            tickNoise(0.01f,1.25f);
+            tickNoise(0.01f, 1.25f);
         } else {
-            tickNoise(0.01f,0.75f);
+            tickNoise(0.01f, 0.75f);
         }
         tock = !tock;
     }
@@ -52,33 +53,37 @@ public class ComputerControllerBlockEntity extends KineticBlockEntity {
     public void playButton() {
         tickTimer = worldTicksPerComputerTick;
         isRunning = !isRunning;
-        lastPlayer.displayClientMessage(Component.literal(isRunning ? "play" : "pause"),true);
-        tickNoise(1f,1f);
+        lastPlayer.displayClientMessage(Component.literal(isRunning ? "play" : "pause"), true);
+        tickNoise(1f, 1f);
     }
 
-     public void stepButton() { // i never knew my real button...
+    public void stepButton() { // i never knew my real button...
         computerTick();
-        lastPlayer.displayClientMessage(Component.literal("Step"),true);
+        lastPlayer.displayClientMessage(Component.literal("Step"), true);
         tickNoise(1f, 1.1f);
-     }
+    }
 
-     public void speedSlider(float value) {
-        float sliderValue = ((value-2)/11)*1;//some maths to make the 2-13 range into a 0-1 range
+    public void speedSlider(float value) {
+        float sliderValue = ((value - 2) / 11) * 1;// some maths to make the 2-13 range into a 0-1 range
         worldTicksPerComputerTick = worldTicksPerComputerTickMax * (1 - sliderValue);
-        lastPlayer.displayClientMessage(Component.literal("world ticks per computer tick: " + worldTicksPerComputerTick),true);
-     }
+        lastPlayer.displayClientMessage(
+                Component.literal("world ticks per computer tick: " + worldTicksPerComputerTick), true);
+    }
 
-     public void tickNoise(float volume, float pitch) {
-         assert level != null;
-         level.playSound(lastPlayer, this.getBlockPos(), SoundEvents.DISPENSER_DISPENSE,SoundSource.BLOCKS, volume, pitch);
-     }
+    public void tickNoise(float volume, float pitch) {
+        assert level != null;
+        level.playSound(lastPlayer, this.getBlockPos(), SoundEvents.DISPENSER_DISPENSE, SoundSource.BLOCKS, volume,
+                pitch);
+    }
 
-    public void handleRightClick(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        Vec2 faceCoords =  BlockInteractionUtils.getFrontFaceCoords(state, hitResult);
+    public void handleRightClick(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hitResult) {
+        Vec2 faceCoords = BlockInteractionUtils.getFrontFaceCoords(state, hitResult);
         Direction hitFacing = hitResult.getDirection();
         Direction blockFacing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
         lastPlayer = player;
-        if (hitFacing != blockFacing) return;
+        if (hitFacing != blockFacing)
+            return;
 
         if (faceCoords.y >= 2 && faceCoords.y <= 8) {
             if (faceCoords.x >= 2 && faceCoords.x <= 6) {
@@ -93,7 +98,8 @@ public class ComputerControllerBlockEntity extends KineticBlockEntity {
         }
     }
 
-    public void handleShiftRightClick(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult){
+    public void handleShiftRightClick(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
+            InteractionHand hand, BlockHitResult hitResult) {
         lastPlayer = player;
     }
 

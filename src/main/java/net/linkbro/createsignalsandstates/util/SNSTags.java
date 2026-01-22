@@ -13,7 +13,7 @@ public class SNSTags {
         public static TagKey<Block> COMPUTERBLOCKS = createTag("computer_blocks");
 
         private static TagKey<Block> createTag(String name) {
-            return BlockTags.create(ResourceLocation.fromNamespaceAndPath(CreateSignalsAndStates.MODID,name));
+            return BlockTags.create(ResourceLocation.fromNamespaceAndPath(CreateSignalsAndStates.MODID, name));
         }
     }
 
@@ -25,7 +25,7 @@ public class SNSTags {
         public static TagKey<Item> FOUR_SLOT_MODULES = createTag("four_slot_wide_modules");
 
         private static TagKey<Item> createTag(String name) {
-            return ItemTags.create(ResourceLocation.fromNamespaceAndPath(CreateSignalsAndStates.MODID , name));
+            return ItemTags.create(ResourceLocation.fromNamespaceAndPath(CreateSignalsAndStates.MODID, name));
         }
     }
 }

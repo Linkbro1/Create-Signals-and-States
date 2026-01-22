@@ -14,7 +14,7 @@ public class SerializationUtils {
         tag.putString("itemName", module.itemName);
 
         ListTag inputList = new ListTag();
-        for (Port inPort : module.input ) {
+        for (Port inPort : module.input) {
             inputList.add(serializePort(inPort));
         }
         tag.put("inputList", inputList);

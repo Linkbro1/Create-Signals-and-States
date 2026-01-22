@@ -26,7 +26,8 @@ import java.util.function.Supplier;
 @Mod(CreateSignalsAndStates.MODID)
 public class CreateSignalsAndStates {
     public static final String MODID = "createsignalsandstates";
-    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TAB = DeferredRegister.create(Registries.CREATIVE_MODE_TAB, MODID);
+    public static final DeferredRegister<CreativeModeTab> CREATIVE_MODE_TAB = DeferredRegister
+            .create(Registries.CREATIVE_MODE_TAB, MODID);
 
     public CreateSignalsAndStates(IEventBus modEventBus, ModContainer modContainer) {
         modEventBus.addListener(this::commonSetup);
@@ -41,11 +42,11 @@ public class CreateSignalsAndStates {
         modContainer.registerConfig(ModConfig.Type.COMMON, Config.SPEC);
     }
 
-    public static final Supplier<CreativeModeTab> SIGNALS_AND_STATES_TAB = CREATIVE_MODE_TAB.register("signals_and_states_tab",
+    public static final Supplier<CreativeModeTab> SIGNALS_AND_STATES_TAB = CREATIVE_MODE_TAB.register(
+            "signals_and_states_tab",
             () -> CreativeModeTab.builder()
                     .title(Component.translatable("creativetab.createsignalsandstates.signals_and_states_tab"))
-                    .icon(() -> new ItemStack(SNSItems.CABLE.get()))
-                    .displayItems((ItemDisplayParameters,output) -> {
+                    .icon(() -> new ItemStack(SNSItems.CABLE.get())).displayItems((ItemDisplayParameters, output) -> {
                         output.accept(SNSBlocks.COMPUTER_CONTROLLER);
                         output.accept(SNSBlocks.COMPUTER_RACK);
 
@@ -72,7 +73,8 @@ public class CreateSignalsAndStates {
 
         @SubscribeEvent
         public static void registerBER(EntityRenderersEvent.RegisterRenderers event) {
-            event.registerBlockEntityRenderer(SNSBlockEntities.RACK_BLOCK_ENTITY.get(), ComputerRackBlockEntityRenderer::new);
+            event.registerBlockEntityRenderer(SNSBlockEntities.RACK_BLOCK_ENTITY.get(),
+                    ComputerRackBlockEntityRenderer::new);
         }
     }
 }
