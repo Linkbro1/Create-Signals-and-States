@@ -6,6 +6,7 @@ import net.linkbro.createsignalsandstates.classes.ModuleFactory;
 import net.linkbro.createsignalsandstates.classes.SlotOnRack;
 import net.linkbro.createsignalsandstates.util.BlockInteractionUtils;
 import net.linkbro.createsignalsandstates.util.SNSTags;
+import net.linkbro.createsignalsandstates.util.SerializationUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup.Provider;
@@ -27,7 +28,7 @@ public class ComputerRackBlockEntity extends BlockEntity {
     public Module[] backModules = new Module[4];
 
     @Override
-    protected void saveAdditional(CompoundTag tag, Provider registries) {
+    protected void saveAdditional(CompoundTag tag, Provider registries) { //TODO: fix this, something here is fucked, it doesn't let the world save right 
         super.saveAdditional(tag, registries);
         ListTag frontModuleList = new ListTag();
         ListTag backModuleList = new ListTag();
@@ -41,7 +42,7 @@ public class ComputerRackBlockEntity extends BlockEntity {
             if (module == null || module == prevModule) {
                 frontModuleList.add(emptyTag);
             } else {
-                frontModuleList.add(Module.serializeNBT(module));
+                frontModuleList.add(SerializationUtils.serializeModule(module));
             }
         }
         tag.put("frontModuleList", frontModuleList);
@@ -55,8 +56,7 @@ public class ComputerRackBlockEntity extends BlockEntity {
             if (module == null || module == prevModule) {
                 backModuleList.add(emptyTag);
             } else {
-
-                backModuleList.add(Module.serializeNBT(module));
+                backModuleList.add(SerializationUtils.serializeModule(module));
             }
         }
         tag.put("backModuleList", backModuleList);
@@ -68,7 +68,7 @@ public class ComputerRackBlockEntity extends BlockEntity {
 
         ListTag frontModuleList = tag.getList("frontModuleList", Tag.TAG_COMPOUND);
         for (int i = 0; i < frontModuleList.size(); i++) {
-            Module module = Module.deserializeNBT(frontModuleList.getCompound(i));
+            Module module = SerializationUtils.deserializeModule(frontModuleList.getCompound(i));
             if (module != null) {
                 addModule(module, this, i);
             }
@@ -77,7 +77,7 @@ public class ComputerRackBlockEntity extends BlockEntity {
 
         ListTag backModuleList = tag.getList("backModuleList", Tag.TAG_COMPOUND);
         for (int i = 0; i < backModuleList.size(); i++) {
-            Module module = Module.deserializeNBT(backModuleList.getCompound(i));
+            Module module = SerializationUtils.deserializeModule(backModuleList.getCompound(i));
             if (module != null) {
                 addModule(module, this, i+4);
             }
