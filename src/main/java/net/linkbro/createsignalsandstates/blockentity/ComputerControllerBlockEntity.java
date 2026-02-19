@@ -1,7 +1,7 @@
 package net.linkbro.createsignalsandstates.blockentity;
 
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
-import net.linkbro.createsignalsandstates.util.BlockInteractionUtils;
+import net.linkbro.createsignalsandstates.util.linkUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
@@ -78,7 +78,7 @@ public class ComputerControllerBlockEntity extends KineticBlockEntity {
 
     public void handleRightClick(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player,
             InteractionHand hand, BlockHitResult hitResult) {
-        Vec2 faceCoords = BlockInteractionUtils.getFrontFaceCoords(state, hitResult);
+        Vec2 faceCoords = linkUtils.getFrontFaceCoords(state, hitResult);
         Direction hitFacing = hitResult.getDirection();
         Direction blockFacing = state.getValue(BlockStateProperties.HORIZONTAL_FACING);
         lastPlayer = player;

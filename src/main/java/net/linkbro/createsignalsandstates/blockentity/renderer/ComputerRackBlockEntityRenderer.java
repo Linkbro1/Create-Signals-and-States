@@ -1,12 +1,11 @@
 package net.linkbro.createsignalsandstates.blockentity.renderer;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.math.Axis;
-
 import net.linkbro.createsignalsandstates.blockentity.ComputerRackBlockEntity;
+import net.linkbro.createsignalsandstates.classes.Module;
 import net.linkbro.createsignalsandstates.classes.ModuleFactory;
 import net.linkbro.createsignalsandstates.classes.SlotOnRack;
-import net.linkbro.createsignalsandstates.util.BlockInteractionUtils;
+import net.linkbro.createsignalsandstates.util.linkUtils;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.blockentity.BlockEntityRenderer;
@@ -23,7 +22,7 @@ public class ComputerRackBlockEntityRenderer implements BlockEntityRenderer<Comp
     public ComputerRackBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
     }
 
-    private double pixel = BlockInteractionUtils.VoxelLength;
+    private double pixel = linkUtils.VoxelLength;
 
     @Override
     public void render(ComputerRackBlockEntity blockEntity, float partialTick, PoseStack poseStack,
@@ -35,73 +34,34 @@ public class ComputerRackBlockEntityRenderer implements BlockEntityRenderer<Comp
         BlockPos frontPos = blockEntity.getBlockPos().relative(facing, 1);
         BlockPos backPos = blockEntity.getBlockPos().relative(facing.getOpposite(), 1);
 
-        int frontLight = BlockInteractionUtils.lightAtPos(level, frontPos);
-        int backLight = BlockInteractionUtils.lightAtPos(level, backPos);
+        int light;
         double baseOffset = 6 * pixel;
 
-        if (blockEntity.frontModules.length >= 3) {
-            for (int i = 0; i < 4; i++) {
-                SlotOnRack previousSOR = blockEntity.getPrevSlot(blockEntity, i, true);
-                net.linkbro.createsignalsandstates.classes.Module module = blockEntity.frontModules[i];
+        for (int i = 0; i < blockEntity.Modules.length; i++) { // POTENTIAL REGRESSION: THIS MIGHT NO LONGER BE ABLE TO
+                                                               // HANDLE MODULES WITH MORE THAN 1 WIDTH
+            SlotOnRack currentSOR = new SlotOnRack(blockEntity, i);
 
-                // assume we should render nothing, then if the previous Block wasn't another
-                // rack, or if it was a rack and the slot isn't occupied by an earlier instance,
-                // change that assumption to the relevant itemstack.
-                ItemStack slotStack = ItemStack.EMPTY;
-                if ((previousSOR.rack == blockEntity && previousSOR.slot == -1)
-                        || (previousSOR.slot != -1 && previousSOR.rack.frontModules[previousSOR.slot] != module)) {
-                    slotStack = ModuleFactory.ItemStackFromModule(module);
-                }
+            if (linkUtils.isModuleOrigin(currentSOR)) {
+                Module module = blockEntity.Modules[i];
+                ItemStack slotStack = ModuleFactory.ItemStackFromModule(module);
+                boolean front = currentSOR.slot >= 0 && currentSOR.slot <= 3;
 
-                double slotOffset = (4 * pixel) * i;
-                double widthOffset = module != null ? (2 * pixel) * (module.width - 1) : 0;
-
+                double slotOffset;
+                double widthOffset = module == null ? 0 : (2 * pixel) * (module.width - 1);
                 poseStack.pushPose();
                 poseStack.translate(0.5, 0.5, 0.5);
-                BlockInteractionUtils.applyFacingRotation(poseStack, facing);
+                if (front) {
+                    linkUtils.applyFacingRotation(poseStack, facing);
+                    slotOffset = (4 * pixel) * i;
+                    light = linkUtils.lightAtPos(level, frontPos);
+                } else {
+                    linkUtils.applyFacingRotation(poseStack, facing.getOpposite());
+                    slotOffset = (4 * pixel) * (i - 4);
+                    light = linkUtils.lightAtPos(level, backPos);
+                }
                 poseStack.translate(baseOffset - slotOffset - widthOffset, 0, -8.5 * pixel);
-                itemRenderer.renderStatic(slotStack, ItemDisplayContext.FIXED, frontLight, packedOverlay, poseStack,
-                        bufferSource, blockEntity.getLevel(), 1);
-                poseStack.popPose();
-            }
-        }
-
-        if (blockEntity.backModules.length >= 3) {
-            for (int i = 0; i < 4; i++) {
-                if (blockEntity.backModules.length < 4) {
-                    break;
-                }
-                SlotOnRack previousSOR = blockEntity.getPrevSlot(blockEntity, i + 4, false);
-                net.linkbro.createsignalsandstates.classes.Module module = blockEntity.backModules[i];
-
-                // ItemStack slotStack = ItemStack.EMPTY;
-                // if ((previousSOR.rack == blockEntity && previousSOR.slot == -1)
-                // || (previousSOR.slot != -1 && previousSOR.rack.frontModules[previousSOR.slot]
-                // != module)) {
-                // slotStack = ModuleFactory.ItemStackFromModule(module);
-                // }
-                ItemStack slotStack = ItemStack.EMPTY;
-                if ((previousSOR.rack == blockEntity && previousSOR.slot == -1)
-                        || (previousSOR.slot != -1 && previousSOR.rack.backModules[previousSOR.slot - 4] != module)) {
-                    slotStack = ModuleFactory.ItemStackFromModule(module);
-                }
-
-                // if (i - 1 < 0) {
-                // slotStack = ModuleFactory.ItemStackFromModule(module);
-                // } else if (blockEntity.backModules[i - 1] != module) {
-                // slotStack = ModuleFactory.ItemStackFromModule(module);
-                // }
-
-                double slotOffset = (4 * pixel) * i;
-                double widthOffset = module != null ? (2 * pixel) * (module.width - 1) : 0;
-
-                poseStack.pushPose();
-                poseStack.translate(0.5, 0.5, 0.5);
-                BlockInteractionUtils.applyFacingRotation(poseStack, facing);
-                poseStack.translate(-baseOffset + slotOffset + widthOffset, 0, 8.5 * pixel);
-                poseStack.mulPose(Axis.YP.rotationDegrees(180f));
-                itemRenderer.renderStatic(slotStack, ItemDisplayContext.FIXED, backLight, packedOverlay, poseStack,
-                        bufferSource, blockEntity.getLevel(), 1);
+                itemRenderer.renderStatic(slotStack, ItemDisplayContext.FIXED, light, packedOverlay, poseStack,
+                        bufferSource, level, 1);
                 poseStack.popPose();
             }
         }
