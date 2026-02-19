@@ -38,20 +38,29 @@ public class ComputerRackBlockEntity extends BlockEntity {
         super(SNSBlockEntities.RACK_BLOCK_ENTITY.get(), pos, blockState);
     }
 
-    public boolean addModule(Module module, SlotOnRack slotOnRack) { // REGRESSION: THIS IS NO LONGER ABLE TO HANDLE
-                                                                     // MODULES MORE THAN 1 WIDTH
+    public boolean addModule(Module module, SlotOnRack slotOnRack) {
         if (slotOnRack == null || module == null) {
             return false;
         }
-        // boolean isRoom = true;
 
-        slotOnRack.rack.Modules[slotOnRack.slot] = module;
+        SlotOnRack targetSOR = slotOnRack;
+        for (int i = 0; i < module.width; i++) {
+            if (targetSOR.rack.Modules[targetSOR.slot] != null) {
+                return false;
+            }
+            targetSOR = linkUtils.getNextSlotOnRack(targetSOR);
+        }
+
+        targetSOR = slotOnRack;
+        for (int i = 0; i < module.width; i++) {
+            targetSOR.rack.Modules[targetSOR.slot] = module;
+            targetSOR = linkUtils.getNextSlotOnRack(targetSOR);
+        }
         return true;
     }
 
     public boolean removeModule(SlotOnRack slotOnRack) { // REGRESSION: THIS IS NO LONGER ABLE TO HANDLE MODULES MORE
-                                                         // THAN 1 WIDTH
-        return removeModule(slotOnRack, 0);
+        return removeModule(slotOnRack, 0); // THAN 1 WIDTH
     }
 
     private boolean removeModule(SlotOnRack slotOnRack, int generation) {
