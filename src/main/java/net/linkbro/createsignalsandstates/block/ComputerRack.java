@@ -8,6 +8,8 @@ import net.linkbro.createsignalsandstates.util.SNSTags;
 import net.linkbro.createsignalsandstates.util.linkUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -58,15 +60,20 @@ public class ComputerRack extends HorizontalDirectionalBlock implements EntityBl
         if (level.getBlockEntity(pos) instanceof ComputerRackBlockEntity controller) {
             SlotOnRack targetedSOR = linkUtils.getSlotOnRack(controller, state, hitResult);
             if (player.isCrouching() && stack.isEmpty()) {
-                if (controller.removeModule(targetedSOR) && !player.isCreative()) { // REGRESSION: NO LONGER TAKES THE
-                                                                                    // ITEM FROM THE PLAYERS HAND
-                    // give them the item back
+                ItemStack moduleStack = ModuleFactory.ItemStackFromModule(targetedSOR.rack.Modules[targetedSOR.slot]);
+                if (controller.removeModule(targetedSOR)) {
+                    level.playSound(player, pos, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 1f, 1f);
+                    if (!player.isCreative()) {
+                        player.setItemInHand(InteractionHand.MAIN_HAND, moduleStack);
+                    }
                 }
                 return ItemInteractionResult.SUCCESS;
             } else if (stack.is(SNSTags.Items.MODULES)) {
-                if (controller.addModule(ModuleFactory.moduleFromItemstack(stack), targetedSOR)
-                        && !player.isCreative()) { // REGRESSION: NO LONGER GIVES THE ITEM BACK TO THE PLAYER
-                    // take the item from their hand
+                if (controller.addModule(ModuleFactory.moduleFromItemstack(stack), targetedSOR)) {
+                    level.playSound(player, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 1f, 1f);
+                    if (!player.isCreative()) {
+                        stack.shrink(1);
+                    }
                 }
                 return ItemInteractionResult.SUCCESS;
             } else {
