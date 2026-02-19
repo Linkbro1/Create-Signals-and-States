@@ -45,7 +45,7 @@ public class ComputerRackBlockEntity extends BlockEntity {
 
         SlotOnRack targetSOR = slotOnRack;
         for (int i = 0; i < module.width; i++) {
-            if (targetSOR.rack.Modules[targetSOR.slot] != null) {
+            if (targetSOR == null || targetSOR.rack.Modules[targetSOR.slot] != null) {
                 return false;
             }
             targetSOR = linkUtils.getNextSlotOnRack(targetSOR);
@@ -59,19 +59,31 @@ public class ComputerRackBlockEntity extends BlockEntity {
         return true;
     }
 
-    public boolean removeModule(SlotOnRack slotOnRack) { // REGRESSION: THIS IS NO LONGER ABLE TO HANDLE MODULES MORE
-        return removeModule(slotOnRack, 0); // THAN 1 WIDTH
-    }
-
-    private boolean removeModule(SlotOnRack slotOnRack, int generation) {
+    public boolean removeModule(SlotOnRack slotOnRack) {
         if (slotOnRack == null) {
             return false;
         }
+        Module moduleToRemove = slotOnRack.rack.Modules[slotOnRack.slot];
+        if (moduleToRemove == null) {
+            return false;
+        }
 
-        if (linkUtils.isModuleOrigin(slotOnRack)) {
-            slotOnRack.rack.Modules[slotOnRack.slot] = null;
-        } else {
-            // call this on the origin
+        SlotOnRack targetSOR = slotOnRack;
+        while (!linkUtils.isModuleOrigin(targetSOR)) {
+            targetSOR = linkUtils.getPreviousSlotOnRack(targetSOR);
+        }
+
+        targetSOR.rack.Modules[targetSOR.slot] = null;
+        SlotOnRack nextSOR = linkUtils.getNextSlotOnRack(targetSOR);
+        if (nextSOR == null) {
+            return true;
+        }
+        while (nextSOR.rack.Modules[nextSOR.slot] == moduleToRemove) {
+            nextSOR.rack.Modules[nextSOR.slot] = null;
+            nextSOR = linkUtils.getNextSlotOnRack(nextSOR);
+            if (nextSOR == null) {
+                return true;
+            }
         }
 
         return true;

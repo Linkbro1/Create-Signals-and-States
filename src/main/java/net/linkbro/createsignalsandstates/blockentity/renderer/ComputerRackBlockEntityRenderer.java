@@ -37,8 +37,7 @@ public class ComputerRackBlockEntityRenderer implements BlockEntityRenderer<Comp
         int light;
         double baseOffset = 6 * pixel;
 
-        for (int i = 0; i < blockEntity.Modules.length; i++) { // POTENTIAL REGRESSION: THIS MIGHT NO LONGER BE ABLE TO
-                                                               // HANDLE MODULES WITH MORE THAN 1 WIDTH
+        for (int i = 0; i < blockEntity.Modules.length; i++) {
             SlotOnRack currentSOR = new SlotOnRack(blockEntity, i);
 
             if (linkUtils.isModuleOrigin(currentSOR)) {
