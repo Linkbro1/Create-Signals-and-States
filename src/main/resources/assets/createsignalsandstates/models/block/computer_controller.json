@@ -2,7 +2,7 @@
   "parent": "minecraft:block/cube",
   "textures": {
     "north": "createsignalsandstates:block/computer_controller",
-    "south": "createsignalsandstates:block/computer_rack_front",
+    "south": "createsignalsandstates:block/computer_controller_back",
     "east": "createsignalsandstates:block/computer_rack_side",
     "west": "createsignalsandstates:block/computer_rack_side",
     "up": "createsignalsandstates:block/computer_rack_top",
