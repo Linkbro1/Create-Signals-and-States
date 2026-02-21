@@ -76,6 +76,9 @@ public class linkUtils {
     }
 
     public static boolean isModuleOrigin(SlotOnRack SOR) {
+        if (SOR == null) {
+            return false;
+        }
         SlotOnRack previousSOR = getPreviousSlotOnRack(SOR);
 
         if (previousSOR == null

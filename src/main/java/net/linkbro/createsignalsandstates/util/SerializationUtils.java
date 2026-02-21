@@ -11,6 +11,9 @@ public class SerializationUtils {
 
     public static CompoundTag serializeModule(Module module) {
         CompoundTag tag = new CompoundTag();
+        if (module == null) {
+            return tag;
+        }
         tag.putString("itemName", module.itemName);
 
         ListTag inputList = new ListTag();

@@ -55,14 +55,30 @@ public class ComputerRack extends HorizontalDirectionalBlock implements EntityBl
     }
 
     @Override
+    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+        if (state.getBlock() != newState.getBlock()) {
+            if (!level.isClientSide && level.getBlockEntity(pos) instanceof ComputerRackBlockEntity rack) {
+                rack.dropModules();
+                level.updateNeighbourForOutputSignal(pos, this);
+            }
+        }
+
+        super.onRemove(state, level, pos, newState, movedByPiston);
+    }
+
+    @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos,
             Player player, InteractionHand hand, BlockHitResult hitResult) {
+        if (level.isClientSide) {
+            return ItemInteractionResult.SUCCESS;
+        }
+
         if (level.getBlockEntity(pos) instanceof ComputerRackBlockEntity controller) {
             SlotOnRack targetedSOR = linkUtils.getSlotOnRack(controller, state, hitResult);
             if (player.isCrouching() && stack.isEmpty()) {
                 ItemStack moduleStack = ModuleFactory.ItemStackFromModule(targetedSOR.rack.Modules[targetedSOR.slot]);
                 if (controller.removeModule(targetedSOR)) {
-                    level.playSound(player, pos, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 1f, 1f);
+                    level.playSound(null, pos, SoundEvents.ITEM_FRAME_REMOVE_ITEM, SoundSource.BLOCKS, 1f, 1f);
                     if (!player.isCreative()) {
                         player.setItemInHand(InteractionHand.MAIN_HAND, moduleStack);
                     }
@@ -70,7 +86,7 @@ public class ComputerRack extends HorizontalDirectionalBlock implements EntityBl
                 return ItemInteractionResult.SUCCESS;
             } else if (stack.is(SNSTags.Items.MODULES)) {
                 if (controller.addModule(ModuleFactory.moduleFromItemstack(stack), targetedSOR)) {
-                    level.playSound(player, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 1f, 1f);
+                    level.playSound(null, pos, SoundEvents.ITEM_FRAME_ADD_ITEM, SoundSource.BLOCKS, 1f, 1f);
                     if (!player.isCreative()) {
                         stack.shrink(1);
                     }
